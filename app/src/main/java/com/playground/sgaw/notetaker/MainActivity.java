@@ -28,7 +28,11 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.LineNumberReader;
 
-
+/**
+ * Home screen activity for note taking app.  Shows all currently saved notes.
+ *
+ * Currently, re-reads all stored notes from filesystem on each onCreate call.
+ */
 public class MainActivity extends ActionBarActivity {
     private static final String LOG_TAG = MainActivity.class.getCanonicalName();
 
@@ -39,7 +43,6 @@ public class MainActivity extends ActionBarActivity {
 
         // Read notes from files created by this app, each note corresponding to one file.
         // TODO(sgaw): Differentiate between app startup and resume
-        Log.i(LOG_TAG, "No saved note");
         displayNotes();
 
         // Show something if there are no notes yet.
@@ -68,23 +71,14 @@ public class MainActivity extends ActionBarActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
+        // User clicked create new note menu item, navigate to the note editor.
         if (id == R.id.action_create) {
-            createNote();
+            Intent intent = new Intent(this, EditNoteActivity.class);
+            startActivity(intent);
             return true;
         }
 
         return super.onOptionsItemSelected(item);
-    }
-
-    /**
-     * Action handler for creating a new note.  Passes to the EditNoteActivity.
-     */
-    public void createNote() {
-        Log.i(LOG_TAG, "createNote");
-
-        Intent intent = new Intent(this, EditNoteActivity.class);
-        startActivity(intent);
     }
 
     /**
@@ -94,13 +88,18 @@ public class MainActivity extends ActionBarActivity {
         Log.i(LOG_TAG, "displayNotes");
         String[] files = getFilesDir().list();
         // TODO(sgaw): Make file reading asynchronous callbacks
-        // TODO(sgaw): sort by modification time and show only the most recent N
+        // TODO(sgaw): sort by modification time, handle need to scroll with many notes.
         for (String filename : files) {
             Log.i(LOG_TAG, "Filename: " + filename);
-            // Read note from file, dropping inaccessible notes
-            String contents = readNote(filename);
-            if (contents != null) {
-                addNote(filename, contents);
+            if (EditNoteActivity.isNoteFilename(filename)) {
+                // Read note from file, dropping inaccessible notes
+                String contents = readNoteContents(filename);
+                if (contents != null) {
+                    addNote(filename, contents);
+                }
+            } else {
+                // Shouldn't be writing spurious files in this app.
+                throw new AssertionError("Unrecognized note filename: " + filename);
             }
         }
     }
@@ -121,11 +120,11 @@ public class MainActivity extends ActionBarActivity {
     }
 
     /**
-     * Read contents of note from file.
+     * Read contents of note from the specified file.
      *
      * Returns null if there are I/O issues.
      */
-    private String readNote(String filename) {
+    private String readNoteContents(String filename) {
         Log.i(LOG_TAG, "readNote, filename:" + filename);
         try {
             StringBuffer stringBuffer = new StringBuffer("");
@@ -140,7 +139,7 @@ public class MainActivity extends ActionBarActivity {
                 builder.append("\n");
             }
             bufferedReader.close();
-            return builder.toString();
+            return builder.toString().trim(); // remove added trailing whitespace.
         } catch (FileNotFoundException fnfe) {
             Log.e(LOG_TAG, "Unable to open file: " + filename, fnfe);
             return null;

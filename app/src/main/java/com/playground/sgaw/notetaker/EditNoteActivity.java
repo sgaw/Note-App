@@ -21,6 +21,22 @@ public class EditNoteActivity extends ActionBarActivity {
     public static final String EXTRA_FILENAME = "com.playground.sgaw.notetaker.FILENAME";
 
     private static final String LOG_TAG = EditNoteActivity.class.getCanonicalName();
+    public static final String NOTE_FILE_PREFIX = "Note-";
+    public static final String NOTE_FILE_SUFFIX = ".txt";
+
+    /**
+     * Checks if filename matches the format for saved notes.  Checks for null input.
+     *
+     * @param filename the name of a file to pattern match against note stored files.
+     */
+    public static boolean isNoteFilename(final String filename) {
+        Log.i(LOG_TAG, "isNoteFilename");
+        if (filename == null) {
+            return false;
+        }
+        return filename.matches(NOTE_FILE_PREFIX + "\\d+" + NOTE_FILE_SUFFIX);
+    }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,7 +97,7 @@ public class EditNoteActivity extends ActionBarActivity {
 
                 String filename = getIntent().getStringExtra(EXTRA_FILENAME);
                 // Re-write note contents to existing files if possible.
-                if (filename == null) {
+                if (!isNoteFilename(filename)) {
                     saveNoteContents(message);
                 } else {
                     saveNoteContents(message, filename);
@@ -106,7 +122,7 @@ public class EditNoteActivity extends ActionBarActivity {
      */
     private void saveNoteContents(String contents) throws IOException {
         // Use timestamp to name files
-        String filename = "Note-" + System.currentTimeMillis() + ".txt";
+        String filename = NOTE_FILE_PREFIX + System.currentTimeMillis() + NOTE_FILE_SUFFIX;
         saveNoteContents(contents, filename);
     }
 
