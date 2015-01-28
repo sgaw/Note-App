@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Notetaker</string>
+    <string name="body_text_hint">Add notes here...</string>
+    <string name="save_button_text">Save</string>
+    <string name="delete_button_text">Delete</string>
+    <string name="title_activity_select_note">Select note</string>
+    <string name="title_activity_edit_note">Edit note</string>
+    <string name="save_fail_text">Unable to save note, try again later.</string>
+    <string name="delete_text">Note deleted</string>
+    <string name="create_note_button_text">Create note</string>
+    <string name="empty_notes_text">No notes yet!  Click on the menu icon to add one.</string>
+
+</resources>
