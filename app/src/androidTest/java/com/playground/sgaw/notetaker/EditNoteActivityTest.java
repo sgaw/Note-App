@@ -1,5 +1,7 @@
 package com.playground.sgaw.notetaker;
 
+import android.app.Activity;
+import android.app.Instrumentation;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
@@ -25,6 +27,7 @@ import java.io.IOException;
 public class EditNoteActivityTest extends ActivityInstrumentationTestCase2<EditNoteActivity> {
     private static final String TEST_FILENAME = "Note-0000.txt";
     private static final String TEST_CONTENT = "Hello, world!";
+    private static final long TIMEOUT_MS = 5000;
 
     private EditNoteActivity editNoteActivity;
     private EditText editText;
@@ -92,12 +95,20 @@ public class EditNoteActivityTest extends ActivityInstrumentationTestCase2<EditN
         // Check the file was written
         assertTrue("Should have written test file.", fileExists(TEST_FILENAME));
 
-        // Need to signal what file should be deleted.
-        Intent intent = editNoteActivity.getIntent();
-        intent.putExtra(EditNoteActivity.EXTRA_FILENAME, TEST_FILENAME);
+        // Need to setup up ActvityMonitor or everything hangs
+        Instrumentation.ActivityMonitor receiverActivityMonitor =
+                getInstrumentation().addMonitor(MainActivity.class.getName(), null, true);
 
+        // Need to signal what file should be deleted.
         StubMenuItem deleteStubMenuItem = new StubMenuItem(R.id.action_delete);
         editNoteActivity.onOptionsItemSelected(deleteStubMenuItem);
+
+        MainActivity mainActivity =
+                (MainActivity) receiverActivityMonitor.waitForActivityWithTimeout(TIMEOUT_MS);
+        assertNotNull("Activity is null.", mainActivity);
+        assertEquals("Monitor for mainActivity was not called.", 1,
+                receiverActivityMonitor.getHits());
+        getInstrumentation().removeMonitor(receiverActivityMonitor);
 
         assertFalse("Test file was not deleted.", fileExists(TEST_FILENAME));
     }

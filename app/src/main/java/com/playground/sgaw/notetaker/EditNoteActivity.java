@@ -10,6 +10,8 @@ import android.view.MenuItem;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import junit.framework.Assert;
+
 import java.io.FileOutputStream;
 import java.io.IOException;
 
@@ -21,6 +23,7 @@ public class EditNoteActivity extends ActionBarActivity {
     private static final String LOG_TAG = EditNoteActivity.class.getCanonicalName();
     public static final String NOTE_FILE_PREFIX = "Note-";
     public static final String NOTE_FILE_SUFFIX = ".txt";
+    private String extraFilename;
 
     /**
      * Checks if filename matches the format for saved notes.  Checks for null input.
@@ -44,11 +47,17 @@ public class EditNoteActivity extends ActionBarActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         // Check if we are editing an existing note.
-        String contents = getIntent().getStringExtra(EXTRA_MESSAGE);
+        Intent intent = getIntent();
+        String contents = intent.getStringExtra(EXTRA_MESSAGE);
         if (contents != null) {
             Log.i(LOG_TAG, "Existing note being edited: " + contents);
             EditText editText = (EditText) findViewById(R.id.editNoteText);
             editText.setText(contents);
+            if (!intent.hasExtra(EXTRA_FILENAME)) {
+                throw new AssertionError("Note contents should be defined with note file. contents: "
+                  + contents);
+            }
+            this.extraFilename = intent.getStringExtra(EXTRA_FILENAME);
         }
     }
 
@@ -93,12 +102,11 @@ public class EditNoteActivity extends ActionBarActivity {
              database entries */
             try {
 
-                String filename = getIntent().getStringExtra(EXTRA_FILENAME);
                 // Re-write note contents to existing files if possible.
-                if (!isNoteFilename(filename)) {
+                if (!isNoteFilename(extraFilename)) {
                     saveNoteContents(message);
                 } else {
-                    saveNoteContents(message, filename);
+                    saveNoteContents(message, extraFilename);
                 }
 
                 startActivity(intent);
@@ -145,17 +153,20 @@ public class EditNoteActivity extends ActionBarActivity {
      */
     private void onDelete() {
         Log.i(LOG_TAG, "onDelete()");
-        Intent callingIntent = getIntent();
-        final String filename = callingIntent.getStringExtra(EXTRA_FILENAME);
         // TODO(sgaw): Add confirmation of delete?
-        if (isNoteFilename(filename)) {
-            Log.i(LOG_TAG, "Deleting note: " + filename);
-            this.deleteFile(filename);
+        if (isNoteFilename(extraFilename)) {
+            Log.i(LOG_TAG, "Deleting note: " + extraFilename);
+            this.deleteFile(extraFilename);
             Toast.makeText(this, R.string.delete_text, Toast.LENGTH_SHORT).show();
         }
 
         Log.i(LOG_TAG, "onDelete navigating home");
         Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);
+    }
+
+    // For testing
+    protected void setExtraFilename(String filename){
+        this.extraFilename = filename;
     }
 }
