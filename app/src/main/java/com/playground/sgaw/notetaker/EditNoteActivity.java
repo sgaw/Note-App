@@ -2,15 +2,13 @@ package com.playground.sgaw.notetaker;
 
 import android.content.Context;
 import android.content.Intent;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.EditText;
 import android.widget.Toast;
-
-import junit.framework.Assert;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -31,7 +29,7 @@ public class EditNoteActivity extends ActionBarActivity {
      */
     public static boolean isNoteFilename(final String filename) {
         Log.i(LOG_TAG, "isNoteFilename");
-        if (filename == null) {
+        if (filename == null || filename.isEmpty()) {
             return false;
         }
         return filename.matches(NOTE_FILE_PREFIX + "\\d+" + NOTE_FILE_SUFFIX);
@@ -132,7 +130,7 @@ public class EditNoteActivity extends ActionBarActivity {
      * @param filename the name of a file to overwrite or create.
      * @throws IOException
      */
-    private void saveNoteContents(String contents, String filename) throws IOException {
+    protected void saveNoteContents(String contents, String filename) throws IOException {
         Log.i(LOG_TAG, "Saving to filename: " + filename);
         FileOutputStream fileOutputStream = openFileOutput(filename, Context.MODE_PRIVATE);
         fileOutputStream.write(contents.getBytes());
@@ -150,7 +148,7 @@ public class EditNoteActivity extends ActionBarActivity {
         Intent callingIntent = getIntent();
         final String filename = callingIntent.getStringExtra(EXTRA_FILENAME);
         // TODO(sgaw): Add confirmation of delete?
-        if (filename != null && !filename.isEmpty()) {
+        if (isNoteFilename(filename)) {
             Log.i(LOG_TAG, "Deleting note: " + filename);
             this.deleteFile(filename);
             Toast.makeText(this, R.string.delete_text, Toast.LENGTH_SHORT).show();

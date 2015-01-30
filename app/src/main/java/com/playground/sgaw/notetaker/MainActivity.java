@@ -2,31 +2,19 @@ package com.playground.sgaw.notetaker;
 
 import android.content.Context;
 import android.content.Intent;
-import android.os.AsyncTask;
-import android.support.v7.app.ActionBarActivity;
-import android.support.v7.app.ActionBar;
-import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
-import android.os.Build;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.LineNumberReader;
 
 /**
  * Home screen activity for note taking app.  Shows all currently saved notes.
@@ -154,7 +142,7 @@ public class MainActivity extends ActionBarActivity {
      *
      * Navigates to the note editor when the user clicks on a note.
      */
-    private class NoteTextView extends TextView {
+    protected class NoteTextView extends TextView {
         private final String filename;
         private String previewText;
 
